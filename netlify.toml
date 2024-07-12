@@ -1,0 +1,17 @@
+[build]
+publish = "dist"
+
+command = "yarn build && yarn install"
+
+[build.environment]
+VITE_CHAIN_ID   = "test4"
+VITE_CHAIN_RPC  = "wss://rpc.test4.gno.land:443/websocket"
+VITE_REALM_PATH = "gno.land/r/gov/dao"
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+
+[[plugins]]
+package = "@netlify/plugin-lighthouse"
