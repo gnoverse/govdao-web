@@ -98,6 +98,10 @@ const Home: FC<IHomeProps> = () => {
         </Flex>
 
         <Flex alignItems={'center'} columnGap={4} mt={8}>
+          <Link href={'https://github.com/gnolang/govdao-web'} isExternal>
+            GitHub Project
+          </Link>
+          <Text>|</Text>
           <Link href={'https://test4.gno.land'} isExternal>
             Official website
           </Link>
