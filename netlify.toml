@@ -1,12 +1,14 @@
 [build]
 publish = "dist"
 
-command = "yarn build && yarn install"
+command = "yarn build"
 
 [build.environment]
-VITE_CHAIN_ID   = "test4"
-VITE_CHAIN_RPC  = "wss://rpc.test4.gno.land:443/websocket"
-VITE_REALM_PATH = "gno.land/r/gov/dao"
+VITE_CHAIN_ID = test4
+VITE_CHAIN_NAME = test4.gno.land
+VITE_CHAIN_WS_RPC = wss://rpc.test4.gno.land/websocket
+VITE_CHAIN_JSON_RPC = https://rpc.test4.gno.land:443
+VITE_REALM_PATH = gno.land/r/gov/dao
 
 [[redirects]]
 from = "/*"
