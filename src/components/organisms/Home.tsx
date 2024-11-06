@@ -53,12 +53,9 @@ const Home: FC<IHomeProps> = () => {
     }
 
     const response: string = await provider.evaluateExpression(
-      Config.REALM_PATH,
+      Config.REALM_JSON_PATH,
       `Proposals(0, 100)` // TODO add pagination
     );
-
-    // TODO remove
-    console.log(response);
 
     // Parse the proposals response
     return parseRenderResponse(response);
