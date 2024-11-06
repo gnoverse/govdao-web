@@ -1,4 +1,7 @@
-import { IProposal } from '../atoms/Proposal/proposal.types.ts';
+import {
+  IProposal,
+  IProposalsResponse
+} from '../atoms/Proposal/proposal.types.ts';
 
 export interface IHomeProps {}
 
@@ -8,27 +11,18 @@ export interface ISocial {
   icon: React.ReactElement;
 }
 
-const proposalListRegex =
-  /-\s\[(\d+)\]\(\/r\/gov\/dao:\d+\)\s-\s(.+?)\s\(\*\*(.+?)\*\*\)\(by\s(.+?)\)/g;
-
 export const parseRenderResponse = (response: string): IProposal[] => {
-  const matches = response.matchAll(proposalListRegex);
+  const propsResponse = parsedJSONOrRaw<IProposalsResponse>(response);
 
-  const proposals: IProposal[] = [];
-  for (const match of matches) {
-    const [, index, comment, status, author] = match;
+  return propsResponse.proposals;
+};
 
-    console.log(
-      `Index: ${index}, Comment: ${comment}, Status: ${status}, Author: ${author}`
-    );
+export const cleanUpRealmReturn = (ret: string) => {
+  return ret.slice(2, -9).replace(/\\"/g, '"');
+};
 
-    proposals.push({
-      id: parseInt(index),
-      description: comment,
-      status,
-      author
-    });
-  }
+export const parsedJSONOrRaw = <T>(data: string): T => {
+  const decoded = cleanUpRealmReturn(data);
 
-  return proposals;
+  return JSON.parse(decoded) as T;
 };

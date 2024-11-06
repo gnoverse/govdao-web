@@ -1,8 +1,4 @@
-import {
-  IProposalProps,
-  IProposalVotes,
-  parseVotingStatus
-} from './proposal.types.ts';
+import { IProposalProps, IStats, parseVotingStatus } from './proposal.types.ts';
 import { FC, useContext, useEffect, useState } from 'react';
 import {
   Box,
@@ -29,7 +25,7 @@ import ProviderContext from '../../../context/ProviderContext.ts';
 import { FaCheck, FaMinusCircle } from 'react-icons/fa';
 
 const Proposal: FC<IProposalProps> = (props) => {
-  const { proposal } = props;
+  const { proposal, id } = props;
 
   const toast = useToast();
   const [voteDisabled, setVoteDisabled] = useState<boolean>(false);
@@ -65,7 +61,7 @@ const Proposal: FC<IProposalProps> = (props) => {
               send: '',
               pkg_path: Config.REALM_PATH,
               func: 'VoteOnProposal',
-              args: [`${proposal.id}`, yes ? 'YES' : 'NO']
+              args: [`${id}`, yes ? 'YES' : 'NO']
             }
           }
         ],
@@ -97,19 +93,22 @@ const Proposal: FC<IProposalProps> = (props) => {
   };
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [displayedVotes, setDisplayedVotes] = useState<IProposalVotes>();
+  const [displayedVotes, setDisplayedVotes] = useState<IStats>(proposal.stats);
 
   const { provider } = useContext(ProviderContext);
 
-  const fetchProposalVotes = async (): Promise<IProposalVotes> => {
+  const fetchProposalVotes = async (): Promise<IStats> => {
     if (!provider) {
       throw new Error('invalid chain RPC URL');
     }
 
     const response: string = await provider.evaluateExpression(
       Config.REALM_PATH,
-      `Render("${proposal.id}")`
+      `ProposalByID(${id})`
     );
+
+    // TODO remove
+    console.log(response);
 
     // Parse the proposals response
     return parseVotingStatus(response);
@@ -119,7 +118,7 @@ const Proposal: FC<IProposalProps> = (props) => {
     setIsLoading(true);
 
     fetchProposalVotes()
-      .then((votes: IProposalVotes) => {
+      .then((votes: IStats) => {
         setDisplayedVotes(votes);
       })
       .catch((e) => {
@@ -128,7 +127,7 @@ const Proposal: FC<IProposalProps> = (props) => {
         toast({
           position: 'bottom-right',
           title: 'Unable to fetch voting status from govdao',
-          description: `An error occurred while fetching voting status for #${proposal.id} from govdao`,
+          description: `An error occurred while fetching voting status for #${id} from govdao`,
           status: 'error',
           isClosable: true
         });
@@ -136,13 +135,21 @@ const Proposal: FC<IProposalProps> = (props) => {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [proposal.id]);
+  }, [id]);
+
+  const renderVoteStat = (
+    name: string,
+    count: number,
+    total: number
+  ): string => {
+    return `${name}: ${count} (${((count / total) * 100).toFixed(2)}%)`;
+  };
 
   return (
     <Card width={'380px'}>
       <CardHeader>
         <Flex alignItems={'center'} justifyContent={'space-between'}>
-          <Heading size="md">{`Proposal #${proposal.id}`}</Heading>
+          <Heading size="md">{`Proposal #${id}`}</Heading>
 
           {proposal.status == 'active' && (
             <Flex ml={4} columnGap={4}>
@@ -186,7 +193,7 @@ const Proposal: FC<IProposalProps> = (props) => {
             )}
             {!isLoading && displayedVotes && (
               <Text pt="2" fontSize="sm" textTransform={'capitalize'}>
-                {`YES: ${displayedVotes.yes}, NO: ${displayedVotes.no}, Voted: ${displayedVotes.percent}%, Members: ${displayedVotes.members}`}
+                {`${renderVoteStat('YES', displayedVotes.yay_votes, displayedVotes.total_voting_power)}, ${renderVoteStat('NO', displayedVotes.nay_votes, displayedVotes.total_voting_power)}, ${renderVoteStat('ABSTAIN', displayedVotes.abstain_votes, displayedVotes.total_voting_power)}, Total VP: ${displayedVotes.total_voting_power}`}
               </Text>
             )}
           </Box>

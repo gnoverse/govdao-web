@@ -54,8 +54,11 @@ const Home: FC<IHomeProps> = () => {
 
     const response: string = await provider.evaluateExpression(
       Config.REALM_PATH,
-      `Render("")`
+      `Proposals(0, 100)` // TODO add pagination
     );
+
+    // TODO remove
+    console.log(response);
 
     // Parse the proposals response
     return parseRenderResponse(response);
@@ -130,7 +133,9 @@ const Home: FC<IHomeProps> = () => {
       {!isLoading && (
         <Flex width={'100%'} mt={12} columnGap={8} rowGap={8} flexWrap={'wrap'}>
           {displayedProposals.map((proposal, id) => {
-            return <Proposal key={`proposal-${id}`} proposal={proposal} />;
+            return (
+              <Proposal key={`proposal-${id}`} id={id} proposal={proposal} />
+            );
           })}
         </Flex>
       )}
